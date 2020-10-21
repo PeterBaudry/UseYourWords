@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>FunnyItems - UseYourWords Admin</title>
+</head>
+<body style="background: linear-gradient(0deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('/assets/images/bg.jpg') no-repeat fixed; background-size: cover">
+
+<div th:insert="fragments/components :: header"></div>
+
+<div class="container">
+    <h1 class="mt-5 mb-5 text-center" th:id="home-title"><i class="fas fa-gamepad"></i> Funny Items</h1>
+    <table class="table table-striped mt-5 text-center">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Content</th>
+            <th scope="col">Type</th>
+            <th scope="col">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item: ${funnyItems}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.content}"></td>
+            <td th:text="${item.type}"></td>
+            <td><a href="#" class="btn btn-success mr-1" data-toggle="modal" data-target="#funnyItemModal" th:attr="onclick=|openModal('${item.type}', '${item.content}')|"><i class="fas fa-search-plus"></i></a><a th:href="@{ funnyItem/delete/{id}(id=${item.id}) }" class="btn btn-danger mr-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce contenu ?')"><i class="far fa-trash-alt"></i></a></td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <a th:href="@{/funnyItems/add}" class="mx-auto mt-2 d-block btn btn-primary"><i class="far fa-plus-square"></i> Add new funny item</a>
+        </div>
+    </div></div>
+<div class="modal fade" id="funnyItemModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img src="" alt="" id="img" class="mx-auto">
+                <video controls id="video" class="mx-auto">
+                    Sorry, your browser doesn't support embedded videos.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:insert="fragments/components :: footer"></div>
+
+<script th:inline="javascript">
+    function openModal(type,content){
+        switch (type) {
+            case "IMAGE":
+                $("#img").attr('src', "/assets/funnyItems/"+content);
+                $('video, #text').hide();
+                $('#img').show();
+
+                break;
+            case "VIDEO":
+                var source = document.createElement('source');
+                source.setAttribute('src', "/assets/funnyItems/"+content);
+                $('video').html(source);
+                $('video').show();
+
+                $('#img, #text').hide();
+                break;
+            case "TEXT":
+
+            default:
+                alert("Erreur dans le format du FunnyItem")
+        }
+    }
+</script>
+</body>
+</html>

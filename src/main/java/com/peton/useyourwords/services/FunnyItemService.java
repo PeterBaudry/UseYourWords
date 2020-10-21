@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +51,12 @@ public class FunnyItemService {
         Page<FunnyItem> itemsPage = funnyItemsRepository.findByType(type, PageRequest.of(randomId, 1));
         return itemsPage.hasContent() ? itemsPage.getContent().get(0) : null;
     }
-
+    @Transactional
+    public void save(FunnyItem funnyItem) {
+        funnyItemsRepository.save(funnyItem);
+    }
+    public void deleteById(int id) {
+        funnyItemsRepository.deleteById(id);
+    }
     //</editor-fold>
 }

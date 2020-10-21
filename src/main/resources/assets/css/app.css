@@ -1,0 +1,13 @@
+a{
+    color: #000;
+}
+#funnyItemModal img{
+    display:block;
+    max-height: 400px
+}
+#funnyItemModal video{
+    display:block;
+}
+table td,th{
+    line-height: 50px;
+}
