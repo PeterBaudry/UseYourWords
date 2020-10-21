@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Users - UseYourWords Admin</title>
+</head>
+<body style="background: linear-gradient(0deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('/assets/images/bg.jpg') no-repeat fixed; background-size: cover">
+
+<div th:insert="fragments/components :: header"></div>
+
+<div class="container">
+    <h1 class="mt-5 mb-5 text-center" th:id="home-title"><i class="fas fa-users-cog"></i> Users</h1>
+    <table class="table table-striped mt-5">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Username</th>
+            <th scope="col">Rank</th>
+            <th scope="col">Wins</th>
+            <th scope="col">Losses</th>
+            <th scope="col">Points</th>
+            <th scope="col">Action</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user: ${users}">
+            <td th:text="${user.id}"></td>
+            <td><img width="50" th:src="@{${'https://identicon-api.herokuapp.com/' + user.username + '/512?format=png'}}" alt="avatar"> <span th:text="${user.username}"></span></td>
+            <td th:text="${user.isAdmin()} ? 'Administrator' : 'Player'"></td>
+            <td th:text="${user.wins}"></td>
+            <td th:text="${user.losses}"></td>
+            <td th:text="${user.points}"></td>
+            <td><a th:href="@{ users/delete/{id}(id=${user.id}) }" class="btn btn-danger mr-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')"><i class="far fa-trash-alt"></i></a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div th:insert="fragments/components :: footer"></div>
+
+</body>
+</html>

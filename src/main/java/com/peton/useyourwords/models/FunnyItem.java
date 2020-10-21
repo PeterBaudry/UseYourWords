@@ -26,6 +26,14 @@ public class FunnyItem {
 
     //<editor-fold desc="Accessors">
 
+    public FunnyItem(FunnyTypes type, String content){
+        this.content = content;
+        this.type = type;
+    }
+    public FunnyItem(){
+
+    }
+
     public int getId() {
         return id;
     }

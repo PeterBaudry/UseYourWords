@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Home - UseYourWords Admin</title>
+</head>
+<body style="background: linear-gradient(0deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('/assets/images/bg.jpg') no-repeat fixed; background-size: cover">
+
+<div th:insert="fragments/components :: header"></div>
+
+<div class="container">
+    <h1 class="mt-5 mb-5 text-center" th:id="home-title">Welcome to UseYourWords administration panel</h1>
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h3 class="text-center"><i class="fas fa-gamepad"></i> Last 5 rooms started :</h3>
+            <table class="table table-striped mt-2 text-center">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Max places</th>
+                    <th scope="col">Started at</th>
+                    <th scope="col">Is Open</th>
+                    <th scope="col">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="room: ${rooms}">
+                    <td th:text="${room.id}"></td>
+                    <td th:text="${room.name}"></td>
+                    <td th:text="${room.maxPlaces}"></td>
+                    <td th:text="${room.isOpen()} ? 'Open' : 'Closes'"></td>
+                    <td><a th:href="@{ rooms/delete/{id}(id=${room.id}) }" class="btn btn-danger mr-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette salle ?')"><i class="far fa-trash-alt"></i></a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h3 class="text-center"><i class="fas fa-gamepad"></i> Last 5 funny items created :</h3>
+            <table class="table table-striped mt-2 text-center">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Content</th>
+                    <th scope="col">Type</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item: ${funnyItems}">
+                    <td th:text="${item.id}"></td>
+                    <td th:text="${item.content}"></td>
+                    <td th:text="${item.type}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <a th:href="@{/funnyItems}" class="mx-auto mt-2 d-block btn btn-primary"><i class="far fa-plus-square"></i> More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:insert="fragments/components :: footer"></div>
+</body>
+</html>

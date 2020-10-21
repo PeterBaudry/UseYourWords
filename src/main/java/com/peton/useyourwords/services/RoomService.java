@@ -5,6 +5,7 @@ import com.peton.useyourwords.exceptions.ItemNotFoundException;
 import com.peton.useyourwords.models.Room;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class RoomService {
         return roomRepository.findById(id).orElseThrow(ItemNotFoundException::new);
     }
 
+    @Transactional
     public Room save(Room room) {
         return roomRepository.save(room);
     }
