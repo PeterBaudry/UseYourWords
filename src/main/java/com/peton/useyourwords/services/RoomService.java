@@ -25,6 +25,10 @@ public class RoomService {
         return roomRepository.findAll();
     }
 
+    public List<Room> findAllByOpen(boolean isOpen) {
+        return roomRepository.findAllByIsOpen(isOpen);
+    }
+
     public Room findById(int id) {
         return roomRepository.findById(id).orElseThrow(ItemNotFoundException::new);
     }

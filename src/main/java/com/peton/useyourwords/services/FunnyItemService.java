@@ -51,5 +51,13 @@ public class FunnyItemService {
         return itemsPage.hasContent() ? itemsPage.getContent().get(0) : null;
     }
 
+    public FunnyItem save(FunnyItem item) {
+        return funnyItemsRepository.save(item);
+    }
+
+    public void deleteById(int id) {
+        funnyItemsRepository.deleteById(id);
+    }
+
     //</editor-fold>
 }

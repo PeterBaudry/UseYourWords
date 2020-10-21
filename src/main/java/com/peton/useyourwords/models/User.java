@@ -1,5 +1,6 @@
 package com.peton.useyourwords.models;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,10 +20,10 @@ public class User implements UserDetails {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "username", length = 50)
+    @Column(name = "username", length = 100, unique = true)
     private String username;
 
-    @Column(name = "password", length = 50)
+    @Column(name = "password", length = 60)
     private String password;
 
     @Column(name = "is_admin")
@@ -36,6 +37,10 @@ public class User implements UserDetails {
 
     @Column(name = "points")
     private int points;
+
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     //</editor-fold>
 
@@ -113,6 +118,14 @@ public class User implements UserDetails {
 
     public void setPoints(int points) {
         this.points = points;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
     }
 
     @Override

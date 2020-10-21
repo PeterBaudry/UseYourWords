@@ -3,9 +3,9 @@
 ### Installation
 Clone le projet :
     
-    git clone https://
+    git clone https://github.com/PeterBaudry/UseYourWords.git
     
-Installer les dépendences maven (ou directement avec l'IDE de votre choix) :
+Installer les dépendences maven (ligne de commande ou directement avec l'IDE de votre choix) :
 
     cd /dossier/installation/use-your-words
     mvn clean install

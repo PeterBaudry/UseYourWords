@@ -23,6 +23,9 @@ public class Room {
     @Column(name = "is_open")
     private boolean isOpen;
 
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<User> users;
+
     //</editor-fold>
 
     //<editor-fold desc="Accessors">
@@ -57,6 +60,14 @@ public class Room {
 
     public void setOpen(boolean open) {
         isOpen = open;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
     //</editor-fold>
