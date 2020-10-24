@@ -60,22 +60,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors().and().csrf().disable()
+                .httpBasic()
+                .and()
                 .authorizeRequests()
-                .antMatchers("/assets/**").permitAll()
-                .antMatchers("/api/**").permitAll()
+                .antMatchers("/assets/**", "/api/users/login").permitAll()
                 .antMatchers("/**").hasAnyRole("ADMIN", "USER")
                 .and()
                 .formLogin();
-//                .loginPage("/ma_page_de_login")
-//                .loginProcessingUrl("/perform_login")
-//                .defaultSuccessUrl("/home", true)
-//                .failureUrl("/ma_page_de_login?error=true")
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .logoutUrl("/ma_page_de_deconnexion")
-//                .logoutSuccessUrl("/ma_page_de_login")
-//                .permitAll();
     }
 
     //</editor-fold>

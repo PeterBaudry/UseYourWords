@@ -1,17 +1,23 @@
 package com.peton.useyourwords.controllers.api;
 
 import com.peton.useyourwords.exceptions.BadRequestException;
+import com.peton.useyourwords.exceptions.InvalidCredentialsException;
 import com.peton.useyourwords.exceptions.UserInDifferentRoomException;
 import com.peton.useyourwords.models.Room;
 import com.peton.useyourwords.models.User;
 import com.peton.useyourwords.services.RoomService;
 import com.peton.useyourwords.services.UserService;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +53,25 @@ public class ApiUserController {
     //</editor-fold>
 
     //<editor-fold desc="Mapping methods">
+
+    @PostMapping("/login")
+    public Map<String, Object> login(@RequestBody Map<String, String> payload) {
+        checkPayload(payload);
+
+        User user = userService.findByUsername(payload.get("username"));
+
+        if (!passwordEncoder.matches(payload.get("password"), user.getPassword())) {
+            throw new InvalidCredentialsException();
+        }
+
+        String userCredentials = payload.get("username") + ":" + payload.get("password");
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("user", user);
+        map.put("token", new String(Base64.encodeBase64(userCredentials.getBytes())));
+
+        return map;
+    }
 
     @GetMapping
     public List<User> index() {
@@ -103,11 +128,12 @@ public class ApiUserController {
 
         item.incrementPoints();
         userService.save(item);
-        messagingTemplate.convertAndSend("/rooms/" + roomId,activeUser.getUsername() + " a voté !");
-        /*messagingTemplate.convertAndSend("/live/rooms/" + roomId, new Object() {
-            Room room = roomService.findById(roomId);
-            String message = activeUser.getUsername() + " a voté !";
-        });*/
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("room", roomService.findById(id));
+        map.put("message", activeUser.getUsername() + " a voté !");
+
+        messagingTemplate.convertAndSend("/rooms/" + roomId, map);
 
         return item;
     }

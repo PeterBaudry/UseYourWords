@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,11 +83,12 @@ public class ApiRoomController {
 
         activeUser.setRoom(item);
         userService.save(activeUser);
-        messagingTemplate.convertAndSend("/rooms/" + id, activeUser.getUsername() + " a rejoint la room !");
-        /*messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
-            Room room = roomService.findById(id);
-            String message = activeUser.getUsername() + " a rejoint la room !";
-        });*/
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("room", roomService.findById(id));
+        map.put("message", activeUser.getUsername() + " a rejoint la room !");
+
+        messagingTemplate.convertAndSend("/rooms/" + id, map);
 
         return item;
     }
@@ -98,11 +100,12 @@ public class ApiRoomController {
 
         activeUser.setRoom(null);
         userService.save(activeUser);
-        messagingTemplate.convertAndSend("/rooms/" + activeUser.getUsername() + " a quitté la room !");
-        /*messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
-            Room room = roomService.findById(id);
-            String message = activeUser.getUsername() + " a quitté la room !";
-        });*/
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("room", roomService.findById(id));
+        map.put("message", activeUser.getUsername() + " a quitté le salon !");
+
+        messagingTemplate.convertAndSend("/rooms/" + id, map);
 
         return item;
     }
@@ -112,10 +115,9 @@ public class ApiRoomController {
         Room item = roomService.findById(id);
         item.setOpen(false);
 
-        messagingTemplate.convertAndSend("/rooms/" + id, new Object() {
-            Room room = roomService.findById(id);
-            String message = item.getName() + " est verrouillé !";
-        });
+        Map<String, Object> map = new HashMap<>();
+        map.put("room", roomService.findById(id));
+        map.put("message", item.getName() + " est verrouillé !");
 
         return roomService.save(item);
     }
