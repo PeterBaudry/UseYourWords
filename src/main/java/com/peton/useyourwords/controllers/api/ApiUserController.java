@@ -103,11 +103,11 @@ public class ApiUserController {
 
         item.incrementPoints();
         userService.save(item);
-
-        messagingTemplate.convertAndSend("/live/rooms/" + roomId, new Object() {
+        messagingTemplate.convertAndSend("/rooms/" + roomId,activeUser.getUsername() + " a voté !");
+        /*messagingTemplate.convertAndSend("/live/rooms/" + roomId, new Object() {
             Room room = roomService.findById(roomId);
             String message = activeUser.getUsername() + " a voté !";
-        });
+        });*/
 
         return item;
     }

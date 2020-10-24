@@ -1,5 +1,7 @@
 package com.peton.useyourwords.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class Room {
     @Column(name = "is_open")
     private boolean isOpen;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<User> users;
 

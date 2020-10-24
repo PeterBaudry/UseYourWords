@@ -82,11 +82,11 @@ public class ApiRoomController {
 
         activeUser.setRoom(item);
         userService.save(activeUser);
-
-        messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
+        messagingTemplate.convertAndSend("/rooms/" + id, activeUser.getUsername() + " a rejoint la room !");
+        /*messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
             Room room = roomService.findById(id);
             String message = activeUser.getUsername() + " a rejoint la room !";
-        });
+        });*/
 
         return item;
     }
@@ -98,11 +98,11 @@ public class ApiRoomController {
 
         activeUser.setRoom(null);
         userService.save(activeUser);
-
-        messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
+        messagingTemplate.convertAndSend("/rooms/" + activeUser.getUsername() + " a quitté la room !");
+        /*messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
             Room room = roomService.findById(id);
             String message = activeUser.getUsername() + " a quitté la room !";
-        });
+        });*/
 
         return item;
     }
@@ -112,7 +112,7 @@ public class ApiRoomController {
         Room item = roomService.findById(id);
         item.setOpen(false);
 
-        messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
+        messagingTemplate.convertAndSend("/rooms/" + id, new Object() {
             Room room = roomService.findById(id);
             String message = item.getName() + " est verrouillé !";
         });
