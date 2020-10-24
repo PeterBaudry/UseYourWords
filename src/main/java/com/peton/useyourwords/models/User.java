@@ -54,8 +54,8 @@ public class User implements UserDetails {
         losses++;
     }
 
-    public void addPoints(int points) {
-        this.points += points;
+    public void incrementPoints() {
+        points++;
     }
 
     //</editor-fold>
@@ -126,6 +126,10 @@ public class User implements UserDetails {
 
     public void setRoom(Room room) {
         this.room = room;
+    }
+
+    public boolean hasRoom() {
+        return room != null;
     }
 
     @Override

@@ -23,13 +23,13 @@
             <td th:text="${item.id}"></td>
             <td th:text="${item.content}"></td>
             <td th:text="${item.type}"></td>
-            <td><a href="#" class="btn btn-success mr-1" data-toggle="modal" data-target="#funnyItemModal" th:attr="onclick=|openModal('${item.type}', '${item.content}')|"><i class="fas fa-search-plus"></i></a><a th:href="@{ funnyItem/delete/{id}(id=${item.id}) }" class="btn btn-danger mr-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce contenu ?')"><i class="far fa-trash-alt"></i></a></td>
+            <td><a href="#" class="btn btn-success mr-1" data-toggle="modal" data-target="#funnyItemModal" th:attr="onclick=|openModal('${item.type}', '${item.content}')|"><i class="fas fa-search-plus"></i></a><a th:href="@{ funny-items/delete/{id}(id=${item.id}) }" class="btn btn-danger mr-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce contenu ?')"><i class="far fa-trash-alt"></i></a></td>
         </tr>
         </tbody>
     </table>
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <a th:href="@{/funnyItems/add}" class="mx-auto mt-2 d-block btn btn-primary"><i class="far fa-plus-square"></i> Add new funny item</a>
+            <a th:href="@{/funny-items/add}" class="mx-auto mt-2 d-block btn btn-primary"><i class="far fa-plus-square"></i> Add new funny item</a>
         </div>
     </div></div>
 <div class="modal fade" id="funnyItemModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -40,6 +40,7 @@
                 <video controls id="video" class="mx-auto">
                     Sorry, your browser doesn't support embedded videos.
                 </video>
+                <div id="text" class="mx-auto"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
@@ -54,22 +55,28 @@
         switch (type) {
             case "IMAGE":
                 $("#img").attr('src', "/assets/funnyItems/"+content);
-                $('video, #text').hide();
+                $('#video, #text').hide();
                 $('#img').show();
-
                 break;
+
             case "VIDEO":
                 var source = document.createElement('source');
                 source.setAttribute('src', "/assets/funnyItems/"+content);
-                $('video').html(source);
-                $('video').show();
-
+                $('#video').html(source);
                 $('#img, #text').hide();
+                $('#video').show();
                 break;
+
             case "TEXT":
+                $('#text').html(content);
+                $('#img, #video').hide();
+                $('#text').show();
+                break;
 
             default:
                 alert("Erreur dans le format du FunnyItem")
+                $('#funnyItemModal').modal('hide');
+                break;
         }
     }
 </script>

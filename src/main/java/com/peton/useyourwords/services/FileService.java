@@ -15,8 +15,14 @@ import java.nio.file.*;
 @Service
 public class FileService{
 
+    //<editor-fold desc="Fields">
+
     @Value("${app.upload.dir:${user.home}}")
     public String uploadDir;
+
+    //</editor-fold>
+
+    //<editor-fold desc="Methods">
 
     public void uploadFile(MultipartFile file, int id) {
 
@@ -34,6 +40,7 @@ public class FileService{
 
         }
     }
+
     public void deleteFile(String filePath) throws IOException {
         try
         {
@@ -44,4 +51,6 @@ public class FileService{
             System.out.println("No such file exists");
         }
     }
+
+    //</editor-fold>
 }

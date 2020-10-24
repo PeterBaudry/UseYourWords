@@ -28,6 +28,22 @@ public class Room {
 
     //</editor-fold>
 
+    //<editor-fold desc="Methods">
+
+    public boolean addUser(User u) {
+        if (users.size() >= maxPlaces) {
+            return false;
+        }
+
+        return users.add(u);
+    }
+
+    public boolean removeUser(User u){
+        return users.remove(u);
+    }
+
+    //</editor-fold>
+
     //<editor-fold desc="Accessors">
 
     public int getId() {

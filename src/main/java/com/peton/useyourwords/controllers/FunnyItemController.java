@@ -21,8 +21,9 @@ import java.util.Comparator;
 import java.util.List;
 
 
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Controller
-@RequestMapping("/funnyItem")
+@RequestMapping("/funny-items")
 public class FunnyItemController {
 
     @Autowired
@@ -54,14 +55,14 @@ public class FunnyItemController {
             funnyItemService.save(new FunnyItem(type, content));
 
         fileService.uploadFile(file, id);
-        return "redirect:/funnyItem";
+        return "redirect:/funny-items";
     }
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable int id) {
         try {
             fileService.deleteFile(env.getProperty("app.upload.dir")+funnyItemService.findById(id).getContent());
             funnyItemService.deleteById(id);
-            return "redirect:/funnyItem";
+            return "redirect:/funny-items";
         } catch (ItemNotFoundException | IOException e) {
             return "errors/404";
         }

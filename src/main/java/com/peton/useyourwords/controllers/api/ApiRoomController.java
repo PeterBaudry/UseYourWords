@@ -1,15 +1,16 @@
 package com.peton.useyourwords.controllers.api;
 
 import com.peton.useyourwords.exceptions.BadRequestException;
-import com.peton.useyourwords.models.FunnyItem;
+import com.peton.useyourwords.exceptions.UserInDifferentRoomException;
 import com.peton.useyourwords.models.Room;
-import com.peton.useyourwords.models.enums.FunnyTypes;
-import com.peton.useyourwords.services.FunnyItemService;
+import com.peton.useyourwords.models.User;
 import com.peton.useyourwords.services.RoomService;
+import com.peton.useyourwords.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,13 @@ public class ApiRoomController {
     //<editor-fold desc="Fields">
 
     @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private UserService userService;
 
     //</editor-fold>
 
@@ -39,7 +46,7 @@ public class ApiRoomController {
 
     @GetMapping
     public List<Room> index(@RequestParam(required = false) boolean open) {
-        return open ? roomService.findAllByOpen(true) : roomService.findAll();
+        return open ? roomService.findAllByIsOpen(true) : roomService.findAll();
     }
 
     @PostMapping
@@ -65,7 +72,51 @@ public class ApiRoomController {
         Room item = roomService.findById(id);
         item.setName(payload.get("name"));
         item.setMaxPlaces(Integer.parseInt(payload.get("max_places")));
-        item.setOpen(true);
+        return roomService.save(item);
+    }
+
+    @GetMapping("/{id}/join")
+    public Room join(@PathVariable int id, Principal principal) {
+        User activeUser = userService.findByUsername(principal.getName());
+        Room item = roomService.findById(id);
+
+        activeUser.setRoom(item);
+        userService.save(activeUser);
+
+        messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
+            Room room = roomService.findById(id);
+            String message = activeUser.getUsername() + " a rejoint la room !";
+        });
+
+        return item;
+    }
+
+    @GetMapping("/{id}/leave")
+    public Room leave(@PathVariable int id, Principal principal) {
+        User activeUser = userService.findByUsername(principal.getName());
+        Room item = roomService.findById(id);
+
+        activeUser.setRoom(null);
+        userService.save(activeUser);
+
+        messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
+            Room room = roomService.findById(id);
+            String message = activeUser.getUsername() + " a quitté la room !";
+        });
+
+        return item;
+    }
+
+    @GetMapping("/{id}/close")
+    public Room close(@PathVariable int id) {
+        Room item = roomService.findById(id);
+        item.setOpen(false);
+
+        messagingTemplate.convertAndSend("/live/rooms/" + id, new Object() {
+            Room room = roomService.findById(id);
+            String message = item.getName() + " est verrouillé !";
+        });
+
         return roomService.save(item);
     }
 

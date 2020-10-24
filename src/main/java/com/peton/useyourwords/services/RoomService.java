@@ -3,6 +3,7 @@ package com.peton.useyourwords.services;
 import com.peton.useyourwords.dao.IRoomRepository;
 import com.peton.useyourwords.exceptions.ItemNotFoundException;
 import com.peton.useyourwords.models.Room;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +27,24 @@ public class RoomService {
         return roomRepository.findAll();
     }
 
-    public List<Room> findAllByOpen(boolean isOpen) {
+    public List<Room> findAllByIsOpen(boolean isOpen) {
         return roomRepository.findAllByIsOpen(isOpen);
     }
 
     public Room findById(int id) {
-        return roomRepository.findById(id).orElseThrow(ItemNotFoundException::new);
+        Room room = roomRepository.findById(id).orElseThrow(ItemNotFoundException::new);
+        Hibernate.initialize(room.getUsers());
+        return room;
     }
 
     @Transactional
     public Room save(Room room) {
-        return roomRepository.save(room);
+        roomRepository.save(room);
+        Hibernate.initialize(room.getUsers());
+        return room;
     }
 
+    @Transactional
     public void deleteById(int id) {
         roomRepository.deleteById(id);
     }

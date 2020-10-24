@@ -37,7 +37,7 @@ public class ApiFunnyItemController {
 
     @GetMapping
     public List<FunnyItem> index(@RequestParam(required = false) FunnyTypes type, @RequestParam(required = false) boolean random) {
-        List<FunnyItem> items = type != null ? funnyItemService.findAllByType(type) : funnyItemService.findAll();
+                List<FunnyItem> items = type != null ? funnyItemService.findAllByType(type) : funnyItemService.findAll();
         if (random) {
             Collections.shuffle(items);
         }

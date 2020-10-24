@@ -34,12 +34,6 @@ public class FunnyItemService {
         return funnyItemsRepository.findAllByType(type);
     }
 
-    public List<FunnyItem> findAllByTypeOrderByRandom(FunnyTypes type) {
-        List<FunnyItem> items = findAllByType(type);
-        Collections.shuffle(items);
-        return items;
-    }
-
     public FunnyItem findById(int id) {
         return funnyItemsRepository.findById(id).orElseThrow(ItemNotFoundException::new);
     }
@@ -57,6 +51,7 @@ public class FunnyItemService {
         return funnyItemsRepository.save(item);
     }
 
+    @Transactional
     public void deleteById(int id) {
         funnyItemsRepository.deleteById(id);
     }
