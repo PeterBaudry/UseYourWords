@@ -58,6 +58,7 @@ public class ApiRoomController {
         item.setName(payload.get("name"));
         item.setCurrentRound(0);
         item.setCurrentState("play");
+        item.setCurrentUserActionsCount(0);
         item.setMaxPlaces(Integer.parseInt(payload.get("max_places")));
         item.setOpen(true);
         return roomService.save(item);
@@ -101,11 +102,43 @@ public class ApiRoomController {
         Room item = roomService.findById(id);
 
         activeUser.setRoom(null);
+        activeUser.setPoints(0);
         userService.save(activeUser);
 
         Map<String, Object> map = new HashMap<>();
         map.put("room", roomService.findById(id));
         map.put("message", activeUser.getUsername() + " a quitté le salon !");
+
+        messagingTemplate.convertAndSend("/rooms/" + id, map);
+
+        return item;
+    }
+
+    @PostMapping("/{id}/message")
+    public Room message(@PathVariable int id, Principal principal, @RequestBody Map<String, String> payload) {
+        User activeUser = userService.findByUsername(principal.getName());
+        Room item = roomService.findById(id);
+
+        if (activeUser.getRoom().getId() == id) {
+            throw new UserInDifferentRoomException();
+        }
+
+        if (!payload.containsKey("sentence")) {
+            throw new BadRequestException("The 'sentence' field is required.");
+        }
+
+        item.incrementCurrentUserActionsCount();
+        if (item.getCurrentUserActionsCount() == item.getUsers().size()) {
+            item.setCurrentUserActionsCount(0);
+            item.setCurrentState("vote");
+        }
+        roomService.save(item);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("room", roomService.findById(id));
+        map.put("message", activeUser.getUsername() + " a submit sa phrase !");
+        map.put("sentence", payload.get("sentence"));
+        map.put("userId", activeUser.getId());
 
         messagingTemplate.convertAndSend("/rooms/" + id, map);
 

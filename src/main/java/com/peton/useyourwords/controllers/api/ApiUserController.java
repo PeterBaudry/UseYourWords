@@ -129,6 +129,15 @@ public class ApiUserController {
         item.incrementPoints();
         userService.save(item);
 
+        Room room = roomService.findById(id);
+
+        room.incrementCurrentUserActionsCount();
+        if (room.getCurrentUserActionsCount() == room.getUsers().size()) {
+            room.setCurrentUserActionsCount(0);
+            room.setCurrentState("play");
+        }
+        roomService.save(room);
+
         Map<String, Object> map = new HashMap<>();
         map.put("room", roomService.findById(id));
         map.put("message", activeUser.getUsername() + " a voté !");
