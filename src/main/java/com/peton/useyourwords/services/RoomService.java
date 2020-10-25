@@ -2,6 +2,7 @@ package com.peton.useyourwords.services;
 
 import com.peton.useyourwords.dao.IRoomRepository;
 import com.peton.useyourwords.exceptions.ItemNotFoundException;
+import com.peton.useyourwords.models.FunnyItem;
 import com.peton.useyourwords.models.Room;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class RoomService {
 
     @Transactional
     public void deleteById(int id) {
+        Room item = findById(id);
+        item.setFunnyItems(null);
+        roomRepository.save(item);
         roomRepository.deleteById(id);
     }
 
