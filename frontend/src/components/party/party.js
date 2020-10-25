@@ -25,54 +25,30 @@ class Party extends React.Component {
             room: null,
             voted: [],
             userSentence:null,
-            sentences: [{
-                userId:1,
-                content:'simon LOREM IPSulOREM IPSul OREM IPSulOREM IPSul',
-            },{
-                userId:3,
-                content:'test LOREM IPSulOREM IPSul OREM IPSulOREM IPSul',
-            }],
+            userSentenceSend:false,
+            sentences: [],
+            activities: [],
             user: JSON.parse(localStorage.getItem("user")),
-            party : {
-                currentRound: 0,
-                state: 1, //0= write sentence / 1=vote / 2=Round finish
-                rounds:
-                    [{
-                        sentences: [{
-                            player:{id:1,name:"simon", score:1000},
-                            content:'simon LOREM IPSulOREM IPSul OREM IPSulOREM IPSul',
-                            win:false
-                        },{
-                            player:{id:3,name:"peter", score:666},
-                            content:'peter LOREM IPSulOREM IPSul OREM IPSulOREM IPSul',
-                            win:true
-                        },{
-                            player:{id:2,name:"jean", score:440},
-                            content:'jean LOREM IPSulOREM IPSul OREM IPSulOREM IPSul',
-                            win:false
-                        }]
-                    }],
-                currentState:"Let's vote !",
-                activities: [{
-                    hour:"12:08",
-                    content: 'Party start !'
-                }]
-            },
-            userId : 1,
             replay:null
         }
         this.vote = this.vote.bind(this);
         this.replay = this.replay.bind(this);
         this.leave = this.leave.bind(this);
+        this.submitSentence = this.submitSentence.bind(this);
+
+        const self = this;
         axios.get("http://localhost:8080/api/rooms/"+this.state.roomId+"/join",{
             headers: {
                 'Authorization': `Basic ${this.state.user.token}`
             }
         }).then(function (response) {
-            console.log("joined");
+
+            self.setState({room: response.data})
+
         }).catch(function (error) {
-                console.log(error);
+            console.log(error);
         });
+
 
     }
 
@@ -99,36 +75,35 @@ class Party extends React.Component {
                 url={`http://localhost:8080/live/`}
                 topics={['/rooms/'+this.state.roomId]}
                 onConnect={() => {
-                    var date = new Date;
 
-                    this.setState(state => {
-                        const list = state.party.activities.push({hour:date.getHours()+':'+date.getMinutes(),content: 'Connected'});
-
-                        return {
-                            list,
-                            value: '',
-                        };
-                    });
                 }}
                 onDisconnect={() => {
                     console.log("Disconnected");
                 }}
                 onMessage={(data) => {
-                    console.log("message : ", data);
+                    console.log(data.room)
+                    if(data.sentence){
+                        this.setState(state => {
+                            const list = state.sentences.push({userId: data.userId, content:data.sentence});
+                            return {
+                                list,
+                                value: '',
+                            };
+                        });
 
+                    }
                     var date = new Date;
                     this.setState(state => {
-                        const list = state.party.activities.push({hour:date.getHours()+':'+date.getMinutes(),content: data.message});
+                        const list = state.activities.push({hour:date.getHours()+':'+date.getMinutes(),content: data.message});
 
                         return {
                             list,
                             value: '',
                         };
                     });
-                    console.log('room', data.room)
-                        this.setState({
-                            room: data.room
-                        });
+                    this.setState({
+                        room: data.room
+                    });
 
                 }}
                />
@@ -139,12 +114,34 @@ class Party extends React.Component {
                 <a href="" onClick={() => {if(window.confirm('Are you sure you want leave this party ?')){ this.leave()};}} className="text-white text-decoration-none"><h1 className="cartoonish"><FontAwesomeIcon icon={faChevronCircleLeft} /> Leave</h1></a>
             </div>
             <div className="party">
-                <h1 className="text-center text-white cartoonish" style={{marginTop:"50px", fontSize:'4rem'}}>{this.state.party.currentState}</h1>
-                {this.state.room.currentState === "vote" ? <h1 className="text-center text-white cartoonish">{this.state.voted.length}/{this.state.room.users.length} Voted</h1>: ''}
+                <h1 className="text-center text-white cartoonish" style={{marginTop:"50px", fontSize:'4rem'}}>{this.state.room.currentState}</h1>
                 <div className="row justify-content-center p-3">
                     <div className="col-md-9 pb-3">
                         <div className="position-relative">
-                            <img src="https://picsum.photos/750/600" className="content" alt=""/>
+                            {(() => {
+                                if (this.state.room.funnyItems[this.state.room.currentRound].type === "TEXT") {
+                                    return (
+                                        <h1 className="text-center text-funny">{this.state.room.funnyItems[this.state.room.currentRound].content}</h1>
+                                    )
+
+                                }else if (this.state.room.funnyItems[this.state.room.currentRound].type === "IMAGE") {
+
+                                    return(
+                                        <img src={"http://localhost:8080/assets/funnyItems/"+this.state.room.funnyItems[this.state.room.currentRound].content} className="content" alt=""/>
+                                    )
+                                }else{
+                                    return(
+                                        <div>
+                                            <video controls width="250">
+
+                                                <source src={"http://localhost:8080/assets/funnyItems/"+this.state.room.funnyItems[this.state.room.currentRound].content}
+                                                        type="video/mp4"></source>
+
+                                            </video>
+                                        </div>
+                                    )
+                                }
+                            })()}
                             <div style={styletv} className="tv"></div>
                         </div>
 
@@ -155,25 +152,34 @@ class Party extends React.Component {
                 <div className="actions pt-3">
                     {(() => {
                         if (this.state.room.currentState === "play") {
-                            return (
-                                <div className="w-75 mx-auto">
-                                    <InputGroup>
-                                        <InputGroup.Prepend>
-                                            <InputGroup.Text>
-                                                <FontAwesomeIcon icon={faCommentDots} />
-                                            </InputGroup.Text>
-                                        </InputGroup.Prepend>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Your funny sentence"
-                                            onChange={e => {
-                                                this.setState({userSentence:e.target.value});
-                                            }}
-                                        />
-                                    </InputGroup>
-                                    <button className="btn btn-success mt-3 mx-auto d-block w-50" onClick={this.submitSentence}><FontAwesomeIcon icon={faCheckCircle} /> Submit sentence</button>
-                                </div>
-                            )
+                            if(!this.state.userSentenceSend){
+                                return (
+                                    <div className="w-75 mx-auto">
+                                        <InputGroup>
+                                            <InputGroup.Prepend>
+                                                <InputGroup.Text>
+                                                    <FontAwesomeIcon icon={faCommentDots} />
+                                                </InputGroup.Text>
+                                            </InputGroup.Prepend>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Your funny sentence"
+                                                onChange={e => {
+                                                    this.setState({userSentence:e.target.value});
+                                                }}
+                                            />
+                                        </InputGroup>
+                                        <button className="btn btn-success mt-3 mx-auto d-block w-50" onClick={this.submitSentence}><FontAwesomeIcon icon={faCheckCircle} /> Submit sentence</button>
+                                    </div>
+                                )
+                            }else{
+                                return (
+                                    <div className="w-75 mx-auto">
+                                        <h1 className="text-center">Sentence send</h1>
+                                    </div>
+                                )
+                            }
+
                         } else if(this.state.room.currentState === "vote") {
                             if (this.state.replay === null) {
                                 return (
@@ -182,7 +188,7 @@ class Party extends React.Component {
                                             return <div className="text-center col-md-2" key={index}>
                                                 <p className="indexPlayer"><FontAwesomeIcon icon={faUser} /> {index+1} </p>
                                                 <button className="btn btn-primary d-block mx-auto" onClick={() => this.replay(value)}><FontAwesomeIcon icon={faCommentDots} /> Sentence</button>
-                                                <button className="btn btn-success ml-2 d-block mx-auto mt-1" onClick={() => this.vote(value.id)} disabled={this.state.voted.includes(this.state.user.user.id)}><FontAwesomeIcon icon={faUserCheck} /> Vote</button>
+                                                <button className="btn btn-success ml-2 d-block mx-auto mt-1" onClick={() => this.vote(value.id)} disabled={this.state.voted.includes(this.state.user.user.id) || value.id == this.state.user.user.id}><FontAwesomeIcon icon={faUserCheck} /> Vote</button>
                                             </div>
                                         })}
                                     </div>
@@ -193,19 +199,10 @@ class Party extends React.Component {
                                         <h5>Player N°{this.state.room.users.findIndex(item => item.id === this.state.replay.player)+1} wrote :</h5>
                                         <p>« {this.state.replay.sentence.content} »</p>
                                         <div className="btn btn-secondary" onClick={() => this.setState({replay:null})}><FontAwesomeIcon icon={faChevronCircleLeft} /> Go back</div>
-                                        <div className="btn btn-success ml-2" onClick={() => this.vote(this.state.replay.player)} disabled={this.state.voted.includes(this.state.user.user.id)}><FontAwesomeIcon icon={faUserCheck} /> Vote for him</div>
                                     </div>
                                 )
                             }
 
-                        }else{
-                            return (
-                                <div className="text-center">
-                                    <h1 className="mb-3 cartoonish mt-1">Round over !</h1>
-                                    <h4><strong>{this.state.party.rounds[this.state.party.currentRound].sentences.filter(elem => elem.win)[0].player.name}</strong> win this round with sentence :</h4>
-                                    <h5>« {this.state.party.rounds[this.state.party.currentRound].sentences.filter(elem => elem.win)[0].content} »</h5>
-                                </div>
-                            )
                         }
                     })()}
                 </div>
@@ -217,7 +214,7 @@ class Party extends React.Component {
                 <div className="activities">
                     <h5 className="text-center mt-3">Activity</h5>
                     <div className="mt-3 text-center">
-                        {this.state.party.activities.map((value, index) => {
+                        {this.state.activities.map((value, index) => {
                             return <p  key={index}><span className="text-secondary">{value.hour} : </span>{value.content}</p>
                         })}
 
@@ -239,7 +236,7 @@ class Party extends React.Component {
     leave(){
         console.log("leave")
         var self = this;
-        axios.get("http://localhost:8080/api/rooms/"+this.state.roomId+"/leave",{
+        axios.get("http://localhost:8080/api/rooms/"+this.state.room.id+"/leave",{
             headers: {
                 'Authorization': `Basic ${this.state.user.token}`
             }
@@ -253,6 +250,7 @@ class Party extends React.Component {
 
     }
     vote(id){
+        this.setState({userSentence:null,userSentenceSend:false})
         this.setState(state => {
             const list = state.voted.push(state.user.user.id);
             return {
@@ -260,13 +258,12 @@ class Party extends React.Component {
                 value: '',
             };
         });
-        let self = this;
+        var self = this;
         axios.get("http://localhost:8080/api/users/"+id+"/vote",{
             headers: {
                 'Authorization': `Basic ${this.state.user.token}`
             }
         }).then(function (response) {
-
             self.setState(state => {
                 const list = state.room.users;
                 list[list.map(function(e) { return e.id; }).indexOf(id)] = response.data;
@@ -282,7 +279,18 @@ class Party extends React.Component {
 
     }
     submitSentence(){
-        console.log("submitSentence")
+        this.setState({voted:[], userSentenceSend:true})
+        axios.post("http://localhost:8080/api/rooms/"+this.state.room.id+"/message",{
+            'sentence':this.state.userSentence
+        },{
+            headers: {
+                'Authorization': `Basic ${this.state.user.token}`
+            }
+        }).then(function (response) {
+            console.log("sentence ok ")
+        }).catch(function (error) {
+            console.log(error);
+        });
     }
 }
 

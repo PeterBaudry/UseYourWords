@@ -129,7 +129,7 @@ public class ApiUserController {
         item.incrementPoints();
         userService.save(item);
 
-        Room room = roomService.findById(id);
+        Room room = roomService.findById(roomId);
 
         room.incrementCurrentUserActionsCount();
         if (room.getCurrentUserActionsCount() == room.getUsers().size()) {
@@ -141,7 +141,7 @@ public class ApiUserController {
         roomService.save(room);
 
         Map<String, Object> map = new HashMap<>();
-        map.put("room", roomService.findById(id));
+        map.put("room", roomService.findById(roomId));
         map.put("message", activeUser.getUsername() + " a voté !");
 
         messagingTemplate.convertAndSend("/rooms/" + roomId, map);

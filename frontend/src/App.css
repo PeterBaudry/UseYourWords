@@ -66,6 +66,12 @@
   left: 50px;
   top: 30px;
 }
+.text-funny{
+  position: absolute;
+  left: 30%;
+  top: 50%;
+  transform: translate(-30% -50%);
+}
 .actions{
   position: absolute;
   height: 180px;
