@@ -111,13 +111,19 @@ public class ApiRoomController {
         activeUser.setPoints(0);
         userService.save(activeUser);
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("room", roomService.findById(id));
-        map.put("message", activeUser.getUsername() + " a quitté le salon !");
+        item.removeUser(activeUser);
+        if (item.getUsers().size() > 0) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("room", roomService.findById(id));
+            map.put("message", activeUser.getUsername() + " a quitté le salon !");
 
-        messagingTemplate.convertAndSend("/rooms/" + id, map);
+            messagingTemplate.convertAndSend("/rooms/" + id, map);
 
-        return item;
+            return item;
+        } else {
+            roomService.deleteById(id);
+            return null;
+        }
     }
 
     @PostMapping("/{id}/message")
