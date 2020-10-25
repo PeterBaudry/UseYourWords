@@ -134,7 +134,9 @@ public class ApiUserController {
         room.incrementCurrentUserActionsCount();
         if (room.getCurrentUserActionsCount() == room.getUsers().size()) {
             room.setCurrentUserActionsCount(0);
-            room.setCurrentState("play");
+            room.incrementCurrentRound();
+
+            room.setCurrentState(room.getCurrentRound() >= 10 ? "end" : "play");
         }
         roomService.save(room);
 

@@ -41,11 +41,11 @@ public class Room {
     private List<User> users;
 
     @JsonManagedReference
-    @ManyToMany(cascade = { CascadeType.ALL })
+    @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
             name = "room_items",
-            joinColumns = { @JoinColumn(name = "room_id") },
-            inverseJoinColumns = { @JoinColumn(name = "funny_item_id") }
+            joinColumns = {@JoinColumn(name = "room_id")},
+            inverseJoinColumns = {@JoinColumn(name = "funny_item_id")}
     )
     private List<FunnyItem> funnyItems;
 
@@ -61,12 +61,16 @@ public class Room {
         return users.add(u);
     }
 
-    public boolean removeUser(User u){
+    public boolean removeUser(User u) {
         return users.remove(u);
     }
 
     public void incrementCurrentUserActionsCount() {
         currentUserActionsCount++;
+    }
+
+    public void incrementCurrentRound() {
+        currentRound++;
     }
 
     //</editor-fold>
@@ -96,6 +100,7 @@ public class Room {
     public void setCurrentRound(int currentRound) {
         this.currentRound = currentRound;
     }
+
     public String getCurrentState() {
         return currentState;
     }
