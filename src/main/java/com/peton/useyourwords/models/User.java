@@ -1,5 +1,6 @@
 package com.peton.useyourwords.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,6 +41,7 @@ public class User implements UserDetails {
     @Column(name = "points")
     private int points;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;

@@ -1,5 +1,7 @@
 import React from 'react'
 import { Container, Button } from 'react-bootstrap';
+import {  Redirect } from "react-router-dom";
+
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {
         faPlusSquare,
@@ -16,14 +18,23 @@ class Home extends React.Component{
                 super(props);
 
                 this.state = {
+                        user: JSON.parse(localStorage.getItem("user")),
                         rooms : [],
                 }
                 this.createRoom = this.createRoom.bind(this);
+
+
+
         }
         componentDidMount() {
                 var self = this;
-                axios.get("http://localhost:8080/api/rooms")
+                axios.get("http://localhost:8080/api/rooms",{
+                        headers: {
+                                'Authorization': `Basic ${this.state.user.token}`
+                        }
+                })
                     .then(function (response) {
+                            console.log(response.data)
                             self.setState({rooms: response.data})
                     })
                     .catch(function (error) {
@@ -33,6 +44,9 @@ class Home extends React.Component{
         }
 
         render(){
+                if (this.state.redirect) {
+                        return <Redirect to={this.state.redirect} />
+                }
 
                 return <Container>
 
@@ -50,7 +64,7 @@ class Home extends React.Component{
                                     <h2 className="text-white cartoonish">No rooms exist, create one below !</h2>
                                     :
                                     this.state.rooms.map((value, index) => {
-                                            return <div className="room col-md-2">
+                                            return <div className="room col-md-2" key={index}>
                                                     <h6>{value.name}</h6>
                                                     <h5>{value.open ? <span className="text-success"><FontAwesomeIcon
                                                             icon={faCheck}/> Open</span> :
@@ -74,15 +88,20 @@ class Home extends React.Component{
         </Container>
 }
         createRoom() {
-                console.log("create party")
+
                 axios.post("http://localhost:8080/api/rooms", {
                         'name' :this.makeid(6),
                         'max_places':6
+                },{
+                        headers: {
+                                'Authorization': `Basic ${this.state.user.token}`
+                        }
                 }).then(result => {
-                        const rooms = result.data
+                        this.setState({ redirect:  "/party/"+result.data.id});
                 }).catch(e => {
-                        console.log('Error when fetch rooms')
+                        console.log(e)
                 });
+
         }
 
         makeid(length) {

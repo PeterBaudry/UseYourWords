@@ -20,8 +20,8 @@ import Background from "./images/testbg.jpg";
 
 
 function App(props){
-    if(localStorage.getItem("tokens") !== "undefined"){
-        var token = localStorage.getItem("tokens");
+    if(localStorage.getItem("user") !== "undefined"){
+        var token = localStorage.getItem("user");
     }else{
         var token = null;
 
@@ -31,7 +31,7 @@ function App(props){
     const [authTokens, setAuthTokens] = useState(existingTokens);
 
     const setTokens = (data) => {
-        localStorage.setItem("tokens", JSON.stringify(data));
+        localStorage.setItem("user", JSON.stringify(data));
         setAuthTokens(data);
     }
 

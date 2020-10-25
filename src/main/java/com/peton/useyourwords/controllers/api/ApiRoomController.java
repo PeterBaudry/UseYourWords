@@ -56,6 +56,8 @@ public class ApiRoomController {
 
         Room item = new Room();
         item.setName(payload.get("name"));
+        item.setCurrentRound(0);
+        item.setCurrentState("play");
         item.setMaxPlaces(Integer.parseInt(payload.get("max_places")));
         item.setOpen(true);
         return roomService.save(item);

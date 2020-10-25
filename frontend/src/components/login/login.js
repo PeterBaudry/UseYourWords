@@ -6,7 +6,6 @@ import {faLock, faUser} from "@fortawesome/free-solid-svg-icons";
 import Logo from "../../images/logo.png";
 import axios from 'axios';
 import { useAuth } from "../../context/auth";
-import bcrypt from 'bcryptjs'
 
 function Login(){
 
@@ -17,26 +16,13 @@ function Login(){
     const { setAuthTokens } = useAuth();
 
     function postLogin() {
-
-        axios.get("http://localhost:8080/api/users").then(result => {
+        axios.post("http://localhost:8080/api/users/login",{
+            username:userName,
+            password:password
+        }).then(result => {
             if (result.status === 200) {
-                if(result.data.filter(user => user.username === userName && user.password).length >0 ){
-                    result.data.filter(user => user.username === userName && user.password).forEach(element => {
-                        console.log(element)
-                        bcrypt.compare(password, element.password, (err, res) => {
-                            if (res) {
-                                setAuthTokens(element);
-                                setLoggedIn(true);
-                                return;
-                            }else{
-                                setIsError(true);
-                            }
-                        })
-                    })
-                }else {
-                    setIsError(true);
-                }
-
+                setAuthTokens(result.data)
+                setLoggedIn(true);
             } else {
                 setIsError(true);
             }

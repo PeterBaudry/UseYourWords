@@ -78,7 +78,7 @@ public class ApiUserController {
         return userService.findAll();
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public User store(@RequestBody Map<String, String> payload) {
         checkPayload(payload);
 

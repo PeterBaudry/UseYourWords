@@ -1,6 +1,7 @@
 package com.peton.useyourwords.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.List;
@@ -25,7 +26,13 @@ public class Room {
     @Column(name = "is_open")
     private boolean isOpen;
 
-    @JsonIgnore
+    @Column(name = "currentRound")
+    private int currentRound;
+
+    @Column(name = "currentState")
+    private String currentState;
+
+    @JsonManagedReference
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<User> users;
 
@@ -64,7 +71,20 @@ public class Room {
     public void setName(String name) {
         this.name = name;
     }
+    public int getCurrentRound() {
+        return currentRound;
+    }
 
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+    public String getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(String currentState) {
+        this.currentState = currentState;
+    }
     public int getMaxPlaces() {
         return maxPlaces;
     }
