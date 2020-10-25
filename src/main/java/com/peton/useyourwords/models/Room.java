@@ -1,5 +1,6 @@
 package com.peton.useyourwords.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -31,12 +32,22 @@ public class Room {
     @Column(name = "currentState")
     private String currentState;
 
+    @JsonIgnore
     @Column(name = "currentUserActionsCount")
     private int currentUserActionsCount;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<User> users;
+
+    @JsonManagedReference
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+            name = "room_items",
+            joinColumns = { @JoinColumn(name = "room_id") },
+            inverseJoinColumns = { @JoinColumn(name = "funny_item_id") }
+    )
+    private List<FunnyItem> funnyItems;
 
     //</editor-fold>
 
@@ -123,6 +134,14 @@ public class Room {
 
     public void setCurrentUserActionsCount(int currentUserActionsCount) {
         this.currentUserActionsCount = currentUserActionsCount;
+    }
+
+    public List<FunnyItem> getFunnyItems() {
+        return funnyItems;
+    }
+
+    public void setFunnyItems(List<FunnyItem> funnyItems) {
+        this.funnyItems = funnyItems;
     }
 
     //</editor-fold>

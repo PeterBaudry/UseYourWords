@@ -18,6 +18,6 @@ public interface IFunnyItemRepository extends JpaRepository<FunnyItem, Integer> 
 
     public Page<FunnyItem> findByType(FunnyTypes type, Pageable pageable);
 
-    @Query("SELECT f FROM FunnyItem f where f.type = :type order by function('RAND')")
-    public List<FunnyItem> findAllByTypeOrderByRandom(@Param("type") FunnyTypes type);
+    @Query("SELECT f FROM FunnyItem f order by function('RAND')")
+    public List<FunnyItem> findAllOrderByRandom();
 }

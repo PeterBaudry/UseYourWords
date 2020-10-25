@@ -38,12 +38,9 @@ public class FunnyItemService {
         return funnyItemsRepository.findById(id).orElseThrow(ItemNotFoundException::new);
     }
 
-    public FunnyItem findByTypeAndRandom(FunnyTypes type) {
-        int nb = funnyItemsRepository.countByType(type);
-        int randomId = (int)(Math.random() * nb);
-
-        Page<FunnyItem> itemsPage = funnyItemsRepository.findByType(type, PageRequest.of(randomId, 1));
-        return itemsPage.hasContent() ? itemsPage.getContent().get(0) : null;
+    public List<FunnyItem> findTenOrderByRandom() {
+        List<FunnyItem> items = funnyItemsRepository.findAllOrderByRandom();
+        return items.size() > 10 ? items.subList(0, 10) : items;
     }
 
     @Transactional

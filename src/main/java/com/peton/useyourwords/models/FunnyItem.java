@@ -1,8 +1,10 @@
 package com.peton.useyourwords.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.peton.useyourwords.models.enums.FunnyTypes;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "funny_items")
@@ -21,6 +23,10 @@ public class FunnyItem {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private FunnyTypes type;
+
+    @JsonBackReference
+    @ManyToMany(mappedBy = "funnyItems")
+    private List<Room> rooms;
 
     //</editor-fold>
 
@@ -56,6 +62,14 @@ public class FunnyItem {
 
     public void setType(FunnyTypes type) {
         this.type = type;
+    }
+
+    public List<Room> getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(List<Room> rooms) {
+        this.rooms = rooms;
     }
 
     //</editor-fold>

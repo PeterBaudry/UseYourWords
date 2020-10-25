@@ -4,6 +4,7 @@ import com.peton.useyourwords.exceptions.BadRequestException;
 import com.peton.useyourwords.exceptions.UserInDifferentRoomException;
 import com.peton.useyourwords.models.Room;
 import com.peton.useyourwords.models.User;
+import com.peton.useyourwords.services.FunnyItemService;
 import com.peton.useyourwords.services.RoomService;
 import com.peton.useyourwords.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class ApiRoomController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FunnyItemService funnyItemService;
 
     //</editor-fold>
 
@@ -61,6 +65,8 @@ public class ApiRoomController {
         item.setCurrentUserActionsCount(0);
         item.setMaxPlaces(Integer.parseInt(payload.get("max_places")));
         item.setOpen(true);
+        item.setFunnyItems(funnyItemService.findTenOrderByRandom());
+
         return roomService.save(item);
     }
 
