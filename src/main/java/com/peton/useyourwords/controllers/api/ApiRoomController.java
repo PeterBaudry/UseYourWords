@@ -131,7 +131,7 @@ public class ApiRoomController {
         User activeUser = userService.findByUsername(principal.getName());
         Room item = roomService.findById(id);
 
-        if (activeUser.getRoom().getId() == id) {
+        if (activeUser.getRoom().getId() != id) {
             throw new UserInDifferentRoomException();
         }
 

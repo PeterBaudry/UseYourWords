@@ -130,7 +130,7 @@ public class ApiUserController {
         item.incrementPoints();
         userService.save(item);
 
-        Room room = roomService.findById(id);
+        Room room = roomService.findById(roomId);
 
         room.incrementCurrentUserActionsCount();
         if (room.getCurrentUserActionsCount() == room.getUsers().size()) {
