@@ -35,6 +35,7 @@ public class RoomService {
     public Room findById(int id) {
         Room room = roomRepository.findById(id).orElseThrow(ItemNotFoundException::new);
         Hibernate.initialize(room.getUsers());
+        Hibernate.initialize(room.getFunnyItems());
         return room;
     }
 
@@ -42,6 +43,7 @@ public class RoomService {
     public Room save(Room room) {
         roomRepository.save(room);
         Hibernate.initialize(room.getUsers());
+        Hibernate.initialize(room.getFunnyItems());
         return room;
     }
 

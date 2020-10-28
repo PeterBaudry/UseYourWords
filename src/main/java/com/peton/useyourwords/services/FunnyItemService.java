@@ -2,6 +2,7 @@ package com.peton.useyourwords.services;
 
 import com.peton.useyourwords.dao.IFunnyItemRepository;
 import com.peton.useyourwords.exceptions.ItemNotFoundException;
+import com.peton.useyourwords.exceptions.NoFunnyItemsException;
 import com.peton.useyourwords.models.FunnyItem;
 import com.peton.useyourwords.models.enums.FunnyTypes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class FunnyItemService {
 
     public List<FunnyItem> findTenOrderByRandom() {
         List<FunnyItem> items = funnyItemsRepository.findAllOrderByRandom();
+        if (items.isEmpty()) {
+            throw new NoFunnyItemsException();
+        }
         return items.size() > 10 ? items.subList(0, 10) : items;
     }
 

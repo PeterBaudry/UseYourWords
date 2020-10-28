@@ -17,9 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @RestController
@@ -126,6 +125,8 @@ public class ApiUserController {
             throw new UserInDifferentRoomException();
         }
 
+        Map<String, Object> map = new HashMap<>();
+
         item.incrementPoints();
         userService.save(item);
 
@@ -136,11 +137,18 @@ public class ApiUserController {
             room.setCurrentUserActionsCount(0);
             room.incrementCurrentRound();
 
-            room.setCurrentState(room.getCurrentRound() >= 10 ? "end" : "play");
+            if (room.getCurrentRound() >= room.getFunnyItems().size()) {
+                room.getUsers().sort(Comparator.comparing(User::getPoints));
+                int winnerPoints = room.getUsers().get(room.getUsers().size() - 1).getPoints();
+                int[] winnerIds = room.getUsers().stream().filter(u -> u.getPoints() == winnerPoints).mapToInt(u -> u.getPoints()).toArray();
+                room.setCurrentState("end");
+                map.put("winner_ids", winnerIds);
+            } else {
+                room.setCurrentState("play");
+            }
         }
         roomService.save(room);
 
-        Map<String, Object> map = new HashMap<>();
         map.put("room", roomService.findById(id));
         map.put("message", activeUser.getUsername() + " a voté !");
 

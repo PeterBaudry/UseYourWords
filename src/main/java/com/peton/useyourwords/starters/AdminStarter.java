@@ -13,11 +13,18 @@ import javax.annotation.PostConstruct;
 @Service
 @Profile("starter") //DISPO QUE SI ON ACTIVE LE PROFIL "starter"
 public class AdminStarter {
+
+    //<editor-fold desc="Fields">
+
     @Autowired
     private IUserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    //</editor-fold>
+
+    //<editor-fold desc="Methods">
 
     @PostConstruct
     public void init() {
@@ -29,4 +36,6 @@ public class AdminStarter {
             this.userRepository.save(admin);
         }
     }
+
+    //</editor-fold>
 }
