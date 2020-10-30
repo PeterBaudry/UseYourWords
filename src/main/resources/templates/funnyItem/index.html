@@ -54,15 +54,13 @@
     function openModal(type,content){
         switch (type) {
             case "IMAGE":
-                $("#img").attr('src', "/assets/funnyItems/"+content);
+                $("#img").attr('src', '/assets/funnyItems/' + content);
                 $('#video, #text').hide();
                 $('#img').show();
                 break;
 
             case "VIDEO":
-                var source = document.createElement('source');
-                source.setAttribute('src', "/assets/funnyItems/"+content);
-                $('#video').html(source);
+                $("#video").attr('src', '/assets/funnyItems/' + content);
                 $('#img, #text').hide();
                 $('#video').show();
                 break;

@@ -17,27 +17,19 @@ public class FileService{
 
     //<editor-fold desc="Fields">
 
-    @Value("${app.upload.dir:${user.home}}")
-    public String uploadDir;
+    @Value("${app.image.path}")
+    private String path;
 
     //</editor-fold>
 
     //<editor-fold desc="Methods">
 
-    public void uploadFile(MultipartFile file, int id) {
-
+    public void uploadFile(MultipartFile file, String fileName) {
         try {
-
-            ClassLoader classLoader = getClass().getClassLoader();
-
-
-
-            Path copyLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(id + "." + FilenameUtils.getExtension(file.getOriginalFilename())));
+            Path copyLocation = Paths.get(path.replace("/", File.separator) + fileName);
             Files.copy(file.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-
         } catch (Exception e) {
             e.printStackTrace();
-
         }
     }
 
@@ -53,4 +45,5 @@ public class FileService{
     }
 
     //</editor-fold>
+
 }

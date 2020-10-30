@@ -38,6 +38,7 @@ public class FunnyItemController {
         model.addAttribute("funnyItems", funnyItemService.findAll());
         return "funnyItem/index";
     }
+
     @GetMapping("/add")
     public String getAdd(Model model) {
         return "funnyItem/add";
@@ -45,22 +46,24 @@ public class FunnyItemController {
 
     @PostMapping("/add")
     public String postAdd(HttpServletRequest request, @RequestParam FunnyTypes type, @RequestParam(required = false) String content, @RequestParam(required = false) MultipartFile file, Model model) {
+        FunnyItem item = new FunnyItem();
+        item.setType(type);
+        funnyItemService.save(item);
+        if (type == FunnyTypes.TEXT) {
+            item.setContent(content);
+        } else {
+            item.setContent(StringUtils.cleanPath(item.getId() + "." + FilenameUtils.getExtension(file.getOriginalFilename())));
+            fileService.uploadFile(file, item.getContent());
+        }
+        funnyItemService.save(item);
 
-        List<FunnyItem> list = funnyItemService.findAll();
-        Collections.sort(list, Comparator.comparingInt(FunnyItem::getId));
-        int id = list.get(list.size()-1).getId()+1;
-        if(content.length() <= 0)
-            funnyItemService.save(new FunnyItem(type, StringUtils.cleanPath(id+"."+FilenameUtils.getExtension(file.getOriginalFilename()))));
-        else
-            funnyItemService.save(new FunnyItem(type, content));
-
-        fileService.uploadFile(file, id);
         return "redirect:/funny-items";
     }
+
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable int id) {
         try {
-            fileService.deleteFile(env.getProperty("app.upload.dir")+funnyItemService.findById(id).getContent());
+            fileService.deleteFile(env.getProperty("app.upload.dir") + funnyItemService.findById(id).getContent());
             funnyItemService.deleteById(id);
             return "redirect:/funny-items";
         } catch (ItemNotFoundException | IOException e) {
