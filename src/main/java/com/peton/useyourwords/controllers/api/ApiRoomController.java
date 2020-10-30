@@ -93,6 +93,9 @@ public class ApiRoomController {
         activeUser.setRoom(item);
         userService.save(activeUser);
 
+        item.addUser(activeUser);
+        roomService.save(item);
+
         Map<String, Object> map = new HashMap<>();
         map.put("room", roomService.findById(id));
         map.put("message", activeUser.getUsername() + " a rejoint la room !");

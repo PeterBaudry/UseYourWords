@@ -11,7 +11,7 @@ import java.util.Objects;
 
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Service
-public class AuthService implements UserDetailsService {
+public class SecurityService implements UserDetailsService {
 
     //<editor-fold desc="Fields">
 

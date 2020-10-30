@@ -137,19 +137,19 @@ public class ApiUserController {
             room.setCurrentUserActionsCount(0);
             room.incrementCurrentRound();
 
-            if (room.getCurrentRound() >= room.getFunnyItems().size()) {
+            if (room.getCurrentRound() < room.getFunnyItems().size()) {
+                room.setCurrentState("play");
+            } else {
                 room.getUsers().sort(Comparator.comparing(User::getPoints));
                 int winnerPoints = room.getUsers().get(room.getUsers().size() - 1).getPoints();
                 int[] winnerIds = room.getUsers().stream().filter(u -> u.getPoints() == winnerPoints).mapToInt(u -> u.getPoints()).toArray();
                 room.setCurrentState("end");
                 map.put("winner_ids", winnerIds);
-            } else {
-                room.setCurrentState("play");
             }
         }
         roomService.save(room);
 
-        map.put("room", roomService.findById(id));
+        map.put("room", roomService.findById(roomId));
         map.put("message", activeUser.getUsername() + " a voté !");
 
         messagingTemplate.convertAndSend("/rooms/" + roomId, map);

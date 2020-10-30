@@ -1,9 +1,10 @@
 package com.peton.useyourwords.config;
 
-import com.peton.useyourwords.security.AuthService;
+import com.peton.useyourwords.security.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,7 +25,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     //<editor-fold desc="Fields">
 
     @Autowired
-    private AuthService authService;
+    private SecurityService securityService;
 
     //</editor-fold>
 
@@ -47,13 +48,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return source;
     }
 
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="Methods">
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(this.authService);
+        auth.userDetailsService(this.securityService);
     }
 
     @Override
@@ -63,10 +70,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/assets/**", "/api/users/login", "/api/users/register").permitAll()
+                .antMatchers("/assets/**", "/api/users/login", "/api/users/register", "/live/**").permitAll()
                 .antMatchers("/**").hasAnyRole("ADMIN", "USER")
                 .and()
-                .formLogin();
+                .formLogin().permitAll()
+                .and()
+                .logout()
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID").permitAll();
     }
 
     //</editor-fold>
