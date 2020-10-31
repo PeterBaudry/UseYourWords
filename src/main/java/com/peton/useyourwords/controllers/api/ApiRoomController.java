@@ -143,6 +143,7 @@ public class ApiRoomController {
         }
 
         item.incrementCurrentUserActionsCount();
+        item.setOpen(false);
         if (item.getCurrentUserActionsCount() == item.getUsers().size()) {
             item.setCurrentUserActionsCount(0);
             item.setCurrentState("vote");

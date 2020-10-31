@@ -133,7 +133,7 @@ public class ApiUserController {
         Room room = roomService.findById(roomId);
 
         room.incrementCurrentUserActionsCount();
-        if (room.getCurrentUserActionsCount() == room.getUsers().size()) {
+        if (room.getCurrentUserActionsCount() >= room.getUsers().size()) {
             room.setCurrentUserActionsCount(0);
             room.incrementCurrentRound();
 
@@ -142,7 +142,7 @@ public class ApiUserController {
             } else {
                 room.getUsers().sort(Comparator.comparing(User::getPoints));
                 int winnerPoints = room.getUsers().get(room.getUsers().size() - 1).getPoints();
-                int[] winnerIds = room.getUsers().stream().filter(u -> u.getPoints() == winnerPoints).mapToInt(u -> u.getPoints()).toArray();
+                int[] winnerIds = room.getUsers().stream().filter(u -> u.getPoints() == winnerPoints).mapToInt(u -> u.getId()).toArray();
                 room.setCurrentState("end");
                 map.put("winner_ids", winnerIds);
             }

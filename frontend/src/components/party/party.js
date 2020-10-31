@@ -31,12 +31,14 @@ const styletv = {
 function Party(props) {
   const roomId = props.match.params.id;
   const [room, setRoom] = useState(null);
-  const [voted, setVoted] = useState([]);
+  const [voted, setVoted] = useState(false);
   const [userSentence, setUserSentence] = useState(null);
   const [userSentenceSend, setUserSentenceSend] = useState(false);
   const [sentences, setSentences] = useState([]);
   const [activities, setActivities] = useState([]);
   const [replay, setReplay] = useState(null);
+  const [winners, setWinners] = useState([]);
+  const [losers, setLosers] = useState([]);
   const {
     auth: { user, token },
   } = useAuth();
@@ -55,13 +57,13 @@ function Party(props) {
   };
 
   const submitSentence = () => {
-    setVoted([]);
+    setVoted(false);
     setUserSentenceSend(true);
     axios
       .post(
         "http://localhost:8080/api/rooms/" + room.id + "/message",
         {
-          sentence: userSentence,
+          sentence: userSentence || "Pas de phrase",
         },
         {
           headers: {
@@ -80,7 +82,6 @@ function Party(props) {
   const vote = (id) => {
     setUserSentence(null);
     setUserSentenceSend(false);
-    setVoted([...voted, user.id]);
     axios
       .get("http://localhost:8080/api/users/" + id + "/vote", {
         headers: {
@@ -88,9 +89,7 @@ function Party(props) {
         },
       })
       .then(function (response) {
-        const index = room.users.findIndex((u) => u.id === id);
-        room.users[index] = response.data;
-        setRoom(room);
+        setVoted(true);
       })
       .catch(function (error) {
         console.log(error);
@@ -109,9 +108,6 @@ function Party(props) {
                 Authorization: `Basic ${token}`,
               },
             })
-            .then(function (response) {
-              console.log(response);
-            })
             .catch(function (error) {
               console.log(error);
             });
@@ -121,6 +117,7 @@ function Party(props) {
           leave();
         }}
         onMessage={(data) => {
+          console.log(["message", data]);
           if (data.room) {
             setRoom(data.room);
           }
@@ -133,11 +130,27 @@ function Party(props) {
               },
             ]);
           }
+          if (data.winner_ids) {
+            setWinners(
+              data.room.users.filter((u) => data.winner_ids.indexOf(u.id) > -1)
+            );
+            setLosers(
+              data.room.users.filter(
+                (u) => data.winner_ids.indexOf(u.id) === -1
+              )
+            );
+          }
+
           const date = new Date();
           setActivities([
             ...activities,
             {
-              hour: date.getHours() + ":" + date.getMinutes(),
+              hour:
+                (date.getHours() < 10 ? "0" : "") +
+                date.getHours() +
+                ":" +
+                (date.getMinutes() < 10 ? "0" : "") +
+                date.getMinutes(),
               content: data.message,
             },
           ]);
@@ -169,155 +182,216 @@ function Party(props) {
               {room.currentState}
             </h1>
             <div className="row justify-content-center p-3">
-              <div className="col-md-9 pb-3">
-                <div className="position-relative">
-                  {(() => {
-                    if (room.funnyItems[room.currentRound].type === "TEXT") {
+              {winners.length > 0 ? (
+                <div className="col-md-9 pb-3">
+                  <div className="row justify-content-center">
+                    <h1 className="text-center text-white cartoonish">
+                      Gagnant{winners.length === 1 ? "" : "s"}
+                    </h1>
+                  </div>
+                  <div className="row justify-content-around">
+                    {winners.map((value, index) => {
                       return (
-                        <h1 className="text-center text-funny">
-                          {room.funnyItems[room.currentRound].content}
-                        </h1>
-                      );
-                    } else if (
-                      room.funnyItems[room.currentRound].type === "IMAGE"
-                    ) {
-                      return (
-                        <img
-                          src={
-                            "http://localhost:8080/assets/funnyItems/" +
-                            room.funnyItems[room.currentRound].content
-                          }
-                          className="content"
-                          alt=""
-                        />
-                      );
-                    } else {
-                      return (
-                        <div>
-                          <video
-                            controls
-                            width="250"
-                            src={
-                              "http://localhost:8080/assets/funnyItems/" +
-                              room.funnyItems[room.currentRound].content
-                            }
-                          ></video>
+                        <div
+                          className="col-md-4 score"
+                          key={index}
+                          style={style}
+                        >
+                          {value.username}
+                          <br />
+                          <strong>{value.points} PTS</strong>
                         </div>
                       );
-                    }
-                  })()}
-                  <div style={styletv} className="tv"></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="actions pt-3">
-              {(() => {
-                if (room.currentState === "play") {
-                  if (!userSentenceSend) {
-                    return (
-                      <div className="w-75 mx-auto">
-                        <InputGroup>
-                          <InputGroup.Prepend>
-                            <InputGroup.Text>
-                              <FontAwesomeIcon icon={faCommentDots} />
-                            </InputGroup.Text>
-                          </InputGroup.Prepend>
-                          <Form.Control
-                            type="text"
-                            placeholder="Your funny sentence"
-                            onChange={(e) => setUserSentence(e.target.value)}
-                          />
-                        </InputGroup>
-                        <button
-                          className="btn btn-success mt-3 mx-auto d-block w-50"
-                          onClick={submitSentence}
-                        >
-                          <FontAwesomeIcon icon={faCheckCircle} /> Submit
-                          sentence
-                        </button>
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <div className="w-75 mx-auto">
-                        <h1 className="text-center">Sentence send</h1>
-                      </div>
-                    );
-                  }
-                } else if (room.currentState === "vote") {
-                  if (!replay) {
-                    return (
+                    })}
+                  </div>
+                  {losers.length > 0 && (
+                    <div>
                       <div className="row justify-content-center">
-                        {room.users.map((value, index) => {
+                        <h1 className="text-center text-white cartoonish">
+                          Perdant{losers.length === 1 ? "" : "s"}
+                        </h1>
+                      </div>
+                      <div className="row justify-content-around">
+                        {losers.map((value, index) => {
                           return (
-                            <div className="text-center col-md-2" key={index}>
-                              <p className="indexPlayer">
-                                <FontAwesomeIcon icon={faUser} /> {index + 1}{" "}
-                              </p>
-                              <button
-                                className="btn btn-primary d-block mx-auto"
-                                onClick={() =>
-                                  setReplay({
-                                    player: value.id,
-                                    sentence: sentences.filter(
-                                      (elem) => elem.userId === value.id
-                                    )[0],
-                                  })
-                                }
-                              >
-                                <FontAwesomeIcon icon={faCommentDots} />{" "}
-                                Sentence
-                              </button>
-                              <button
-                                className="btn btn-success ml-2 d-block mx-auto mt-1"
-                                onClick={() => vote(value.id)}
-                                disabled={
-                                  voted.includes(user.id) ||
-                                  value.id === user.id
-                                }
-                              >
-                                <FontAwesomeIcon icon={faUserCheck} /> Vote
-                              </button>
+                            <div
+                              className="col-md-4  score"
+                              key={index}
+                              style={style}
+                            >
+                              {value.username}
+                              <br />
+                              <strong>{value.points} PTS</strong>
                             </div>
                           );
                         })}
                       </div>
-                    );
-                  } else {
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="col-md-9 pb-3">
+                  {room.funnyItems[room.currentRound] && (
+                    <div className="position-relative">
+                      {(() => {
+                        if (
+                          room.funnyItems[room.currentRound].type === "TEXT"
+                        ) {
+                          return (
+                            <h1 className="text-center text-funny">
+                              {room.funnyItems[room.currentRound].content}
+                            </h1>
+                          );
+                        } else if (
+                          room.funnyItems[room.currentRound].type === "IMAGE"
+                        ) {
+                          return (
+                            <img
+                              src={
+                                "http://localhost:8080/assets/funnyItems/" +
+                                room.funnyItems[room.currentRound].content
+                              }
+                              className="content"
+                              alt=""
+                            />
+                          );
+                        } else {
+                          return (
+                            <video
+                              className="content"
+                              controls
+                              autoPlay
+                              src={
+                                "http://localhost:8080/assets/funnyItems/" +
+                                room.funnyItems[room.currentRound].content
+                              }
+                            ></video>
+                          );
+                        }
+                      })()}
+                      <div style={styletv} className="tv"></div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {winners.length <= 0 && (
+              <div>
+                <div className="actions pt-3">
+                  {(() => {
+                    if (room.currentState === "play") {
+                      if (!userSentenceSend) {
+                        return (
+                          <div className="w-75 mx-auto">
+                            <InputGroup>
+                              <InputGroup.Prepend>
+                                <InputGroup.Text>
+                                  <FontAwesomeIcon icon={faCommentDots} />
+                                </InputGroup.Text>
+                              </InputGroup.Prepend>
+                              <Form.Control
+                                color="white"
+                                type="text"
+                                onChange={(e) =>
+                                  setUserSentence(e.target.value)
+                                }
+                              />
+                            </InputGroup>
+                            <button
+                              className="btn btn-success mt-3 mx-auto d-block w-50"
+                              onClick={submitSentence}
+                            >
+                              <FontAwesomeIcon icon={faCheckCircle} /> Submit
+                              sentence
+                            </button>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="w-75 mx-auto">
+                            <h1 className="text-center">Sentence send</h1>
+                          </div>
+                        );
+                      }
+                    } else if (room.currentState === "vote") {
+                      if (!replay) {
+                        return (
+                          <div className="row justify-content-center">
+                            {room.users.map((value, index) => {
+                              return (
+                                <div
+                                  className="text-center col-md-2"
+                                  key={index}
+                                >
+                                  <p className="indexPlayer">
+                                    <FontAwesomeIcon icon={faUser} />{" "}
+                                    {index + 1}{" "}
+                                  </p>
+                                  <button
+                                    className="btn btn-primary d-block mx-auto"
+                                    onClick={() =>
+                                      setReplay({
+                                        player: value.id,
+                                        sentence: sentences.filter(
+                                          (elem) => elem.userId === value.id
+                                        )[0],
+                                      })
+                                    }
+                                  >
+                                    <FontAwesomeIcon icon={faCommentDots} />{" "}
+                                    Sentence
+                                  </button>
+                                  <button
+                                    className="btn btn-success ml-2 d-block mx-auto mt-1"
+                                    onClick={() => vote(value.id)}
+                                    disabled={voted || value.id === user.id}
+                                  >
+                                    <FontAwesomeIcon icon={faUserCheck} /> Vote
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="text-center">
+                            <h5>
+                              Player N°
+                              {room.users.findIndex(
+                                (item) => item.id === replay.player
+                              ) + 1}{" "}
+                              wrote :
+                            </h5>
+                            <p>« {replay.sentence.content} »</p>
+                            <div
+                              className="btn btn-secondary"
+                              onClick={() => setReplay(null)}
+                            >
+                              <FontAwesomeIcon icon={faChevronCircleLeft} /> Go
+                              back
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
+                  })()}
+                </div>
+                <div className="scores">
+                  {room.users.map((value, index) => {
                     return (
-                      <div className="text-center">
-                        <h5>
-                          Player N°
-                          {room.users.findIndex(
-                            (item) => item.id === replay.player
-                          ) + 1}{" "}
-                          wrote :
-                        </h5>
-                        <p>« {replay.sentence.content} »</p>
-                        <div
-                          className="btn btn-secondary"
-                          onClick={() => setReplay(null)}
-                        >
-                          <FontAwesomeIcon icon={faChevronCircleLeft} /> Go back
-                        </div>
+                      <div className="score" key={index} style={style}>
+                        {value.username}
+                        <br />
+                        <strong>{value.points} PTS</strong>
                       </div>
                     );
-                  }
-                }
-              })()}
-            </div>
-            <div className="scores">
-              {room.users.map((value, index) => {
-                return (
-                  <div className="score" key={index} style={style}>
-                    {value.username}
-                    <br />
-                    <strong>{value.points} PTS</strong>
-                  </div>
-                );
-              })}
-            </div>
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="activities">
               <h5 className="text-center mt-3">Activity</h5>
               <div className="mt-3 text-center">
